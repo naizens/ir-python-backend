@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import irsdk, math
 
 app = Flask(__name__)
@@ -30,6 +31,27 @@ def get_session_info():
     else:
         return jsonify({"error": "iRacing is not connected"}), 503
 
+@app.route('/api/fuel', methods=['GET'])
+def get_fuel():
+    check_iracing()
+    
+    if state.ir_connected:
+        fuel = ir['FuelLevel']
+        return jsonify(fuel)
+    else:
+        return jsonify({"error": "iRacing is not connected"}), 503
+
+@app.route('/api/replay', methods=['GET'])
+def get_replay_info():
+    check_iracing()
+    
+    if state.ir_connected:
+        replay_info = ir['ReplayFrameNum']
+        driver_info = ir['DriverInfo']
+        d = ir['CarIdxLastLapTime']
+    else:
+        replay_info = {"error": "iRacing is not connected"}
+    return jsonify(replay_info, driver_info, d)
 
 @app.route('/api/telemetry', methods=['GET'])
 def get_telemetry():
@@ -40,11 +62,13 @@ def get_telemetry():
         throttle = ir['Throttle']*100
         brake = ir['Brake']*100
         angle = ir['SteeringWheelAngle'] * (180/math.pi)
+        gear = ir['Gear']
         json = {
-            "speed": round(speed,1),
+            "speed": speed,
             "throttle": round(throttle,1),
             "brake": round(brake,1),
-            "wheelangle": round(angle,1)
+            "wheelangle": round(angle,1),
+            "gear": gear
         }
         return jsonify(json)
     else:
@@ -52,7 +76,7 @@ def get_telemetry():
 
 if __name__ == '__main__':
     ir = irsdk.IRSDK()
-    
     state = State()
     
-    app.run(host='localhost', port=3000, debug=True)
+    CORS(app)
+    app.run(host='localhost', port=3001, debug=True)

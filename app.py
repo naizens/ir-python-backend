@@ -48,9 +48,9 @@ def get_replay_info():
     if state.ir_connected:
         replay_info = ir['ReplayFrameNum']
         driver_info = ir['DriverInfo']
-        d = ir['CarIdxLastLapTime']
+        d = ir['LapBestLap']
     else:
-        replay_info = {"error": "iRacing is not connected"}
+        return jsonify({"error": "iRacing is not connected"}), 503
     return jsonify(replay_info, driver_info, d)
 
 @app.route('/api/telemetry', methods=['GET'])

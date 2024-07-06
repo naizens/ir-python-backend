@@ -60,7 +60,8 @@ def get_telemetry():
         ir.freeze_var_buffer_latest()
         speed = ir['Speed'] # Speed is in m/s, should be converted in Frontend
         throttle = ir['Throttle']*100
-        clutch = ir['ClutchRaw']*100
+        clutch = 100 - ir['Clutch']*100 # Somehow the clutch value is inverted
+        clutchRaw = 100 -  ir['ClutchRaw']*100
         brake = ir['Brake']*100
         angle = ir['SteeringWheelAngle'] * (180/math.pi)
         gear = ir['Gear']
@@ -69,6 +70,7 @@ def get_telemetry():
             "throttle": round(throttle,1),
             "brake": round(brake,1),
             "clutch": round(clutch,1),
+            "clutchRaw": round(clutchRaw,1),
             "wheelangle": round(angle,1),
             "gear": gear
         }

@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import irsdk, math
+import irsdk, math, random
 
 app = Flask(__name__)
 
@@ -52,6 +52,19 @@ def get_replay_info():
     else:
         return jsonify({"error": "iRacing is not connected"}), 503
     return jsonify(replay_info, driver_info, d)
+
+@app.route('/api/rtelemetry', methods=['GET'])
+def get_rtelemetry():
+    data = {
+        "speed": round(random.uniform(0, 100), 1),
+        "throttle": round(random.uniform(0, 100), 1),
+        "brake": round(random.uniform(0, 100), 1),
+        "clutch": round(random.uniform(0, 100), 1),
+        "wheelangle": round(random.uniform(-540, -530), 1),
+        "gear": random.choice([-1, 0, 1, 2, 3, 4, 5, 6])
+    }
+    
+    return jsonify(data)
 
 @app.route('/api/telemetry', methods=['GET'])
 def get_telemetry():

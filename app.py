@@ -37,7 +37,7 @@ def get_fuel():
     
     if state.ir_connected:
         fuel = ir['FuelLevel']
-        return jsonify(fuel)
+        return jsonify({"fuellevel": fuel})
     else:
         return jsonify({"error": "iRacing is not connected"}), 503
 
@@ -55,16 +55,22 @@ def get_replay_info():
 
 @app.route('/api/rtelemetry', methods=['GET'])
 def get_rtelemetry():
-    data = {
-        "speed": round(random.uniform(0, 100), 1),
-        "throttle": round(random.uniform(0, 100), 1),
-        "brake": round(random.uniform(0, 100), 1),
-        "clutch": round(random.uniform(0, 100), 1),
-        "wheelangle": round(random.uniform(-540, -530), 1),
-        "gear": random.choice([-1, 0, 1, 2, 3, 4, 5, 6])
-    }
-    
-    return jsonify(data)
+    check_iracing()
+    if state.ir_connected:
+        ir.freeze_var_buffer_latest()
+        throttle = ir['Throttle']*100
+        clutch = 100 - ir['Clutch']*100 # Somehow the clutch value is inverted
+        clutchRaw = 100 -  ir['ClutchRaw']*100
+        brake = ir['Brake']*100
+        json = {
+            "throttle": round(throttle,1),
+            "brake": round(brake,1),
+            "clutch": round(clutch,1),
+            "clutchRaw": round(clutchRaw,1),
+        }
+        return jsonify(json)
+    else:
+        return jsonify({"error": "iRacing is not connected"}), 503
 
 @app.route('/api/telemetry', methods=['GET'])
 def get_telemetry():
